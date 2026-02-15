@@ -5,7 +5,7 @@ using namespace std;
 
 void mainLoop()
 {
-	cout << "© 2021 Meiware.net\nEND to terminate, hold Q to activate\n";
+	cout << "Â© 2021 Meiware.net\nEND to terminate, hold Q to activate\n";
 
 	srand(time(0));
 
@@ -18,7 +18,7 @@ void mainLoop()
 		if (!hDC)
 		{
 			cout << "Failed to get handle of Device Context!\n";
-			continue;
+			continue; //continue to next iteration and try again
 		}
 
 		POINT cursor;
@@ -47,4 +47,5 @@ int main()
 	mainLoop();
 
 	return 0;
+
 }
