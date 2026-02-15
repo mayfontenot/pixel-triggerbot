@@ -2,7 +2,7 @@
 
 const int PIXEL_COUNT = 4, THRESHOLD = 16;
 
-void getPixels(HDC hDC, POINT pos, COLORREF *pPixels, int size)
+void getPixels(HDC &hDC, POINT pos, COLORREF *pPixels, int size)
 {
 	int index = 0;
 

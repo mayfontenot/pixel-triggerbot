@@ -14,7 +14,7 @@ void mainLoop()
 		HDC hDC = GetDC(nullptr); //get handle of device context (active screen)
 
 		if (!hDC)
-			return;
+			continue;
 
 		POINT cursor;
 		GetCursorPos(&cursor);
