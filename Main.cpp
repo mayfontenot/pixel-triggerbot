@@ -1,73 +1,45 @@
 #include <Windows.h>
 #include <iostream>
-
+#include "Trig.h"
 using namespace std;
 
-const int PIXEL_COUNT = 4, THRESHOLD = 16;
-RECT screen;
-
-void GetPixels(COLORREF* pixels)
+void mainLoop()
 {
-	int index = 0;
+	cout << "© 2021 Meiware.net\nvisually reads pixels and simulates key press\nEND to terminate, hold Q to activate\n";
 
-	for (int x = -1; x < 2; x += 2)
-		for (int y = -1; y < 2; y += 2)
-			pixels[index++] = GetPixel(GetDC(GetActiveWindow()), (int)screen.right / 2 + x, (int)screen.bottom / 2 + y);
-}
+	COLORREF* pOldPixels = new COLORREF[PIXEL_COUNT], * pNewPixels = new COLORREF[PIXEL_COUNT];
 
-COLORREF GetAveragePixelColor(COLORREF* pixels) //calculate average RGB values of 4 pixels
-{
-	int tempR = 0, tempG = 0, tempB = 0;
-
-	for(int i = 0; i < PIXEL_COUNT; i++)
+	while (!GetAsyncKeyState(VK_END))
 	{
-		tempR += (int)GetRValue(pixels[i]);
-		tempG += (int)GetGValue(pixels[i]);
-		tempB += (int)GetBValue(pixels[i]);
+		HDC hDC = GetDC(nullptr); //get handle of device context (active screen)
+
+		if (!hDC)
+			return;
+
+		POINT cursor;
+		GetCursorPos(&cursor);
+
+		if (!GetAsyncKeyState('Q'))
+			getPixels(hDC, cursor, pOldPixels, PIXEL_COUNT); //assign old pixels
+		else
+		{
+			getPixels(hDC, cursor, pNewPixels, PIXEL_COUNT); //assign new pixels
+
+			if (isOutOfThreshold(getAveragePixelColor(pNewPixels, PIXEL_COUNT), getAveragePixelColor(pNewPixels, PIXEL_COUNT), THRESHOLD)) //compare old and current pixels
+				attack();
+		}
+
+		ReleaseDC(nullptr, hDC); //cleanup
+		Sleep(5);
 	}
 
-	return RGB(tempR / PIXEL_COUNT, tempG / PIXEL_COUNT, tempB / PIXEL_COUNT);
-}
-
-bool IsOutOfThreshold(COLORREF old, COLORREF current)
-{
-	return (int)GetRValue(old) > (int)GetRValue(current) + THRESHOLD || (int)GetRValue(old) < (int)GetRValue(current) - THRESHOLD || (int)GetGValue(old) > (int)GetGValue(current) + THRESHOLD || (int)GetGValue(old) < (int)GetGValue(current) - THRESHOLD || (int)GetBValue(old) > (int)GetBValue(current) + THRESHOLD || (int)GetBValue(old) < (int)GetBValue(current) - THRESHOLD;
-}
-
-void Attack()
-{
-	INPUT input;
-	input.type = INPUT_MOUSE;
-	input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
-
-	SendInput(1, &input, sizeof(INPUT));
+	delete[] pNewPixels; //free from heap
+	delete[] pOldPixels;
 }
 
 int main()
 {
-	COLORREF *oldPixels = new COLORREF[PIXEL_COUNT], *currentPixels = new COLORREF[PIXEL_COUNT];
-
-	cout << "Â© 2021 Meiware.net\nvisually examines pixels and simulates key press (no memory modification)\nhold 'Q' for triggerbot" << endl;
-
-	while (true)
-	{
-		GetWindowRect(GetForegroundWindow(), &screen);
-
-		if (!GetAsyncKeyState('Q'))
-			GetPixels(oldPixels); //store old pixels
-		else
-		{
-			GetPixels(currentPixels); //get current pixels
-
-			if (IsOutOfThreshold(GetAveragePixelColor(currentPixels), GetAveragePixelColor(oldPixels))) //compare old and current pixels
-				Attack();
-		}
-
-		Sleep(5);
-	}
-
-	delete[] currentPixels; //garbage collection
-	delete[] oldPixels;
+	mainLoop();
 
 	return 0;
 }
