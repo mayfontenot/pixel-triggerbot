@@ -7,7 +7,7 @@ void mainLoop()
 {
 	cout << "© 2021 Meiware.net\nvisually reads pixels and simulates key press\nEND to terminate, hold Q to activate\n";
 
-	COLORREF* pOldPixels = new COLORREF[PIXEL_COUNT], * pNewPixels = new COLORREF[PIXEL_COUNT];
+	COLORREF *pOldPixels = new COLORREF[PIXEL_COUNT], *pNewPixels = new COLORREF[PIXEL_COUNT];
 
 	while (!GetAsyncKeyState(VK_END))
 	{
@@ -25,7 +25,7 @@ void mainLoop()
 		{
 			getPixels(hDC, cursor, pNewPixels, PIXEL_COUNT); //assign new pixels
 
-			if (isOutOfThreshold(getAveragePixelColor(pNewPixels, PIXEL_COUNT), getAveragePixelColor(pNewPixels, PIXEL_COUNT), THRESHOLD)) //compare old and current pixels
+			if (isOutOfThreshold(getAveragePixelColor(pOldPixels, PIXEL_COUNT), getAveragePixelColor(pNewPixels, PIXEL_COUNT), THRESHOLD)) //compare old and current pixels
 				attack();
 		}
 
