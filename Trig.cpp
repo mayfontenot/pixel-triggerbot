@@ -1,13 +1,14 @@
 #include "Trig.h"
 
-const int PIXEL_COUNT = 4, THRESHOLD = 16;
+const int PIXELS_SQRT = 4, THRESHOLD = 16, DELAY_MIN = 4, DELAY_MAX = 8;
 
-void getPixels(HDC &hDC, POINT pos, COLORREF *pPixels, int size)
+void getPixels(HDC hDC, POINT pos, COLORREF *pPixels, int pixelsSQRT)
 {
 	int index = 0;
+	int halfOfSQRT = pixelsSQRT / 2;
 
-	for (int x = -1; x < 2; x += 2)
-		for (int y = -1; y < 2; y += 2)
+	for (int x = -halfOfSQRT; x < halfOfSQRT; x++)
+		for (int y = -halfOfSQRT; y < halfOfSQRT; y++)
 			pPixels[index++] = GetPixel(hDC, pos.x + x, pos.y + y);
 }
 
@@ -30,11 +31,15 @@ bool isOutOfThreshold(COLORREF oldPixels, COLORREF newPixels, int threshold)
 	return (int)GetRValue(oldPixels) > (int)GetRValue(newPixels) + threshold || (int)GetRValue(oldPixels) < (int)GetRValue(newPixels) - threshold || (int)GetGValue(oldPixels) > (int)GetGValue(newPixels) + threshold || (int)GetGValue(oldPixels) < (int)GetGValue(newPixels) - threshold || (int)GetBValue(oldPixels) > (int)GetBValue(newPixels) + threshold || (int)GetBValue(oldPixels) < (int)GetBValue(newPixels) - threshold;
 }
 
-void attack()
+void fire()
 {
 	INPUT input;
 	input.type = INPUT_MOUSE;
-	input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
+	input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+	SendInput(1, &input, sizeof(INPUT));
 
+	Sleep(rand() % DELAY_MIN + 1);
+
+	input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
 	SendInput(1, &input, sizeof(INPUT));
 }

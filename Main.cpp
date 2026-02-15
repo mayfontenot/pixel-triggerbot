@@ -5,32 +5,37 @@ using namespace std;
 
 void mainLoop()
 {
-	cout << "© 2021 Meiware.net\nvisually reads pixels and simulates key press\nEND to terminate, hold Q to activate\n";
+	cout << "© 2021 Meiware.net\nEND to terminate, hold Q to activate\n";
 
-	COLORREF *pOldPixels = new COLORREF[PIXEL_COUNT], *pNewPixels = new COLORREF[PIXEL_COUNT];
+	srand(time(0));
+
+	COLORREF *pOldPixels = new COLORREF[PIXELS_SQRT * PIXELS_SQRT], *pNewPixels = new COLORREF[PIXELS_SQRT * PIXELS_SQRT];
 
 	while (!GetAsyncKeyState(VK_END))
 	{
 		HDC hDC = GetDC(nullptr); //get handle of device context (active screen)
 
 		if (!hDC)
+		{
+			cout << "Failed to get handle of Device Context!\n";
 			continue;
+		}
 
 		POINT cursor;
 		GetCursorPos(&cursor);
 
 		if (!GetAsyncKeyState('Q'))
-			getPixels(hDC, cursor, pOldPixels, PIXEL_COUNT); //assign old pixels
+			getPixels(hDC, cursor, pOldPixels, PIXELS_SQRT); //assign old pixels
 		else
 		{
-			getPixels(hDC, cursor, pNewPixels, PIXEL_COUNT); //assign new pixels
+			getPixels(hDC, cursor, pNewPixels, PIXELS_SQRT); //assign new pixels
 
-			if (isOutOfThreshold(getAveragePixelColor(pOldPixels, PIXEL_COUNT), getAveragePixelColor(pNewPixels, PIXEL_COUNT), THRESHOLD)) //compare old and current pixels
-				attack();
+			if (isOutOfThreshold(getAveragePixelColor(pOldPixels, PIXELS_SQRT * PIXELS_SQRT), getAveragePixelColor(pNewPixels, PIXELS_SQRT * PIXELS_SQRT), THRESHOLD)) //compare old and current pixels
+				fire();
 		}
 
 		ReleaseDC(nullptr, hDC); //cleanup
-		Sleep(5);
+		Sleep(rand() % (DELAY_MAX - DELAY_MIN + 1) + DELAY_MIN);
 	}
 
 	delete[] pNewPixels; //free from heap
